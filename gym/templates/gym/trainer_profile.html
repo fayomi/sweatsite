@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if user.is_trainer == True %}
+    <h1>Welcome Trainer: {{ user.username }}</h1>
+
+    {% if user.trainerprofile.profile_img %}
+      <img src="{{user.trainerprofile.profile_img.url}}" width="240" alt="No Image">
+    {% endif %}
+
+    <br>
+    <br>
+    <h2>Sessions</h2>
+    <p>get all available or pending sessions</p>
+    <p>model to have available sessions, normal sessions, date, status</p>
+    <p>If offer is pending then button to complete or cancel</p>
+    <p>when status is changed to completed</p>
+    <p>when availble sessions reaches zero sessions is filed away</p>
+    <br>
+    <br>
+    <br>
+    <p>PENDING QUEUE</p>
+    <br>
+    {% for session in session_filter %}
+      {% if session.status == 'pending' %}
+      <form method="GET">
+        {% csrf_token %}
+        Status: {{ session.status}} <br>
+        {{ session.order.client_name}} has requested to use a {{ session.workout_name }} session
+
+        <a class="btn btn-primary" href="{% url 'gym:complete' pk=session.pk %}">Confirm Session</a>
+        </form>
+        <br>
+        <br>
+      {% endif %}
+
+    {% endfor %}
+    <br>
+    <br>
+    <h3>All Clients Which Are Available</h3>
+    {% for session in session_filter %}
+      {% if session.status == 'available' %}
+        <h4>{{ session.order.client_name}} booked {{ session.total_sessions}} workouts of {{session.workout_name}} on {{session.date}}<br></h4>
+        {% for a in available_info %}
+          {% if a.session_id == session.id %}
+          There are {{a.available_sessions}}workouts left. Last workout took place on {{ a.date}}<br>
+          {% endif %}
+
+        {% endfor %}
+
+
+
+      {% endif %}
+
+    {% endfor%}
+    <br>
+    <br>
+    <br>
+
+
+
+  {% else %}
+  <p>You are not a trainer</p>
+
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block content %}
+  <h1>Order Details</h1>
+  <p>Order Number:{{ order.id }} </p>
+  <p>Order Date: {{ order.created|date:"d M Y"}}</p>
+  <p>Total Amount:{{ order.total }} </p>
+  <br>
+  {% for item in order_items%}
+  <p>Workout: {{item.workout}}</p>
+  <p>Trainer: {{item.order.trainer_name}}</p>
+  <p>Quantity: {{item.quantity}}</p>
+  <p>Price: {{item.price}}</p>
+  <p>Sessions: {{item.sessions}}</p>
+  <p>Desctiption: {{item.workout_description}}</p>
+  {% endfor %}
+
+  <h3>Session History</h3>
+  {% for a in available %}
+    {% if a.available_sessions == total %}
+      <p>You started with {{ a.available_sessions }} available sessions. created on: {{ a.date }}</p>
+    {% else %}
+      <p>You have: {{ a.available_sessions }} available sessions. Session last used: {{ a.date }}</p>
+    {% endif %}
+  {% endfor %}
+
+{% endblock %}
