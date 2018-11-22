@@ -392,7 +392,12 @@ def activate(request, uidb64, token):
         user.save()
         login(request, user)
         # return redirect('home')
-        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        if user.is_client:
+            return redirect('gym:client_profile')
+        else:
+            return redirect('gym:trainer_profile')
+
     else:
         return HttpResponse('Activation link is invalid!')
 
