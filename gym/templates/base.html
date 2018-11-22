@@ -30,14 +30,16 @@
             <li> <a href="{% url 'gym:trainer_profile'%}">Welcome Trainer {{ user.username }}</a> </li>
           {% else %}
             <li> <a href="{% url 'gym:client_profile' pk=user.pk%}">Welcome {{ user.username }}</a> </li>
+            <li> <a href="{% url 'cart:cart_detail'%}"> Cart</a> </li>
           {% endif %}
 
-          <li> <a href="{% url 'cart:cart_detail'%}"> Cart</a> </li>
+
           {% if user.is_trainer %}
             <li> <a href="{% url 'order:trainer_order_history'%}">Order History</a> </li>
+            <li> <a href="{% url 'stripe:stripe_register'%}">Register For Payment</a>  </li>
 
           {% else %}
-            <li> <a href="{% url 'order:order_history'%}">Order Hstory</a> </li>
+            <li> <a href="{% url 'order:order_history'%}">Order History</a> </li>
 
           {% endif %}
         {% else %}

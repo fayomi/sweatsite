@@ -10,12 +10,10 @@
       <img src="{{user.clientprofile.profile_img.url}}" width="240" alt="No Image">
     {% endif %}
     <h2>Sessions</h2>
-    <p>get the most recent order id</p>
-    <p>model to have available sessions, normal sessions, date, status</p>
-    <p>if button is pushed, status is changed from unused to pending, second button appears in trainer</p>
-    <p>if button is accepted, status is changed to completed</p>
-    <p>when status is changed to completed new object of AvailableSession is created, status changed back to available</p>
-    <p>when availble sessions reaches zero sessions is filed away</p>
+    <p>Click Request a session to organise a session appointment with your trainer</p>
+    <p>Click Attend Session when you are about to start a session</p>
+    <i>When you click Attend Session a request is sent to your trainer, once they confirm the request
+    the number of sessions you have available will be updated</i>
     <br>
     <br>
     <br>
@@ -24,7 +22,7 @@
       <p>Book another: <a href="{% url 'gym:trainer_detail' pk=session.trainer_id%}">Here</a> </p>
       <p>Checkout your workout history <a href="{% url 'order:order_history'%}">Here</a> </p>
     {% else %}
-      <p>Your newest order is: {{ session.order_id }} from {{ session.order.trainer_name}}</p>
+      <p>Your newest order is from Trainer {{ session.order.trainer_name}}</p>
       {% for a in available %}
         {% if a.available_sessions == total %}
           <p>You started with {{ a.available_sessions }} available sessions. created on: {{ a.date }}</p>
@@ -33,7 +31,8 @@
         {% endif %}
       {% endfor %}
       <a class="btn btn-primary" href="mailto:{{ session.order.trainer_email}}">Request Session</a>
-      <p>Email: {{ session.order.trainer_email}}</p>
+      <br>
+      <br>
         <form method="get">
           <input type="submit" class="btn btn-primary" value="Attend Session" name="use_session">
         </form>
