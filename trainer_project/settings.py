@@ -25,7 +25,7 @@ SECRET_KEY = 'd1)2=eo4(&j#+6*)gu(!&67dks1%jyoyrst%@0b$ogo7s1#4p%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['c897d202.ngrok.io','dev.sweatsite.com','35.195.23.146','127.0.0.1']
 
 
 # Application definition

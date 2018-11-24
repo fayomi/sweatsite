@@ -128,35 +128,17 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             return customer_id
 
 
-        if subscription == 0:
-            stripe_product_name = 'None'
-            stripe_plan_id = 'None'
 
-            print('i am a normal charge')
-            charge = stripe.Charge.create(
-                        amount=stripe_total,
-                        currency="gbp",
-                        source=token,
-                        # customer=stripe_customer_id,
-                        destination={
-                            "account": trainer_stripe_id,
-                            }
-                        # stripe_account=trainer_stripe_id,
-                        )
-        else:
-
-
-
-            if stripe_customer_id == 'None':
+        if stripe_customer_id == 'None':
             # create stripe customer id
-                id = ClientProfile.objects.get(pk=client_id)
-                stripe_customer_id = customer_id(client_email, token)
+            id = ClientProfile.objects.get(pk=client_id)
+            stripe_customer_id = customer_id(client_email, token)
             # token_id = token_id(customer_id)
-                id.stripe_customer_id = stripe_customer_id
+            id.stripe_customer_id = stripe_customer_id
             # id.stripe_token = token_id
-                id.save()
-            else:
-                pass
+            id.save()
+        else:
+            pass
 
         # print(stripe_customer_id)
 
@@ -164,7 +146,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
         # check if the customer has a customer id
         # if not then create one, if so, apply it
         # add the customer to the plan
-        # if subscription == 1:
+        if subscription == 1:
             # create product and plan
             stripe_product_name = product_name()
             print(stripe_product_name)
@@ -191,26 +173,26 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
 
 
         # if it's just a regular charge, make it a destination charge
-        # else:
-        #
-        #
-        #
-        #     # customer = stripe.Customer.create(email=email,source=token)
-        #     # charge = stripe.Charge.create(amount=stripe_total,currency="gbp",description=description,source=token,application_fee=200,stripe_account=trainer_stripe_id)
-        #     stripe_product_name = 'None'
-        #     stripe_plan_id = 'None'
-        #
-        #     print('i am a normal charge')
-        #     charge = stripe.Charge.create(
-        #                 amount=stripe_total,
-        #                 currency="gbp",
-        #                 source=token,
-        #                 # customer=stripe_customer_id,
-        #                 destination={
-        #                     "account": trainer_stripe_id,
-        #                     }
-        #                 # stripe_account=trainer_stripe_id,
-        #                 )
+        else:
+
+
+
+            # customer = stripe.Customer.create(email=email,source=token)
+            # charge = stripe.Charge.create(amount=stripe_total,currency="gbp",description=description,source=token,application_fee=200,stripe_account=trainer_stripe_id)
+            stripe_product_name = 'None'
+            stripe_plan_id = 'None'
+
+            print('i am a normal charge')
+            charge = stripe.Charge.create(
+                        amount=stripe_total,
+                        currency="gbp",
+                        source=token,
+                        # customer=stripe_customer_id,
+                        destination={
+                            "account": trainer_stripe_id,
+                            }
+                        # stripe_account=trainer_stripe_id,
+                        )
 
         #Now Creating the Order
         try:

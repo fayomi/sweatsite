@@ -4,10 +4,15 @@ from .models import StripeDetail, Individual, Company, ExternalAccount
 from .forms import IndividualForm, CompanyForm, ExternalAccountForm
 from django.contrib.auth.decorators import login_required
 
+from django.http import HttpResponse
 import requests
 from django.conf import settings
 
+import json
 import stripe
+
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -265,7 +270,7 @@ def external_account(request):
                 'account_number': account_number,
                 'routing_number': routing_number
 
-            }    
+            }
 
         )
 
@@ -303,7 +308,19 @@ def external_account(request):
 
 
 
+@require_POST
+@csrf_exempt
+def stripe_webhooks(request):
 
+    # Retrieve the request's body and parse it as JSON:
+    details = json.loads(request.body)
+    # print(details)
+    print(details['type'])
+
+
+    # Do something with event_json
+
+    return HttpResponse(status=200)
 
 
 

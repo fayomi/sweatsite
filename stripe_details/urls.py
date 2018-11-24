@@ -9,5 +9,6 @@ urlpatterns = [
     path('individual/', views.stripe_individual, name='stripe_individual'),
     path('company/', views.stripe_company, name='stripe_company'),
     path('external_account/', views.external_account, name='external_account'),
+    path('webhooks/', views.stripe_webhooks, name='stripe_webhooks'),
 
 ]
