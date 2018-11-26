@@ -81,6 +81,8 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
 
 
 
+
+
     # to calculate the net pay
     stripe_fee = stripeFeeCalculator(total)
     service_fee = stripe_fee + platform_fee
@@ -95,6 +97,13 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
         workout_name = cart_item.workout.name
         trainer_email = cart_item.workout.trainer.user.email
         subscription = cart_item.workout.subscription
+        workout_description = cart_item.workout.workout_description
+        trainer_id = cart_item.workout.trainer.user.id
+        sessions = cart_item.workout.sessions
+
+
+
+
 
         def product_name():
             product = stripe.Product.create(
@@ -113,7 +122,15 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             currency='gbp',
             amount=stripe_total,
             stripe_account=trainer_stripe_id,
-            # on_behalf_of=trainer_stripe_id
+            metadata={'client_name':client_name, 'trainer_name':trainer_name,
+                        'token':token,'total':str(total), 'stripe_fee':str(stripe_fee),
+                        'platform_fee':platform_fee, 'service_fee':service_fee,
+                        'net_pay':str(net_pay), 'client_email':client_email, 'trainer_email':trainer_email,
+                        'subscription':subscription, 'stripe_product_name':stripe_product_name, 'trainer_id':trainer_id,
+                        'sessions':sessions
+                        }
+
+
                 )
             plan_id = plan.id
             return plan_id
@@ -131,6 +148,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
         if subscription == 0:
             stripe_product_name = 'None'
             stripe_plan_id = 'None'
+            stripe_subscription_id = 'None'
 
             print('i am a normal charge')
             charge = stripe.Charge.create(
@@ -143,9 +161,8 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
                             }
                         # stripe_account=trainer_stripe_id,
                         )
+
         else:
-
-
 
             if stripe_customer_id == 'None':
             # create stripe customer id
@@ -158,13 +175,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             else:
                 pass
 
-        # print(stripe_customer_id)
 
-        # if the order is a subscription
-        # check if the customer has a customer id
-        # if not then create one, if so, apply it
-        # add the customer to the plan
-        # if subscription == 1:
             # create product and plan
             stripe_product_name = product_name()
             print(stripe_product_name)
@@ -173,12 +184,12 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
 
             print('i am in subscription mode')
 
-
-            # stripe_customer_id = customer_id(client_email, token)
             # stripe_customer_id = request.user.clientprofile.stripe_customer_id
             print(stripe_customer_id)
 
-            stripe_subscription = stripe.Subscription.create(
+            def stripe_subscription(stripe_customer_id,stripe_plan_id,trainer_stripe_id):
+
+                sub = stripe.Subscription.create(
                 customer=stripe_customer_id,
                 items=[
                     {
@@ -188,31 +199,13 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
                 application_fee_percent=1,
                 stripe_account=trainer_stripe_id,
                 )
+                sub_id = sub.id
+                return sub_id
+
+            stripe_subscription_id = stripe_subscription(stripe_customer_id,stripe_plan_id,trainer_stripe_id)
 
 
-        # if it's just a regular charge, make it a destination charge
-        # else:
-        #
-        #
-        #
-        #     # customer = stripe.Customer.create(email=email,source=token)
-        #     # charge = stripe.Charge.create(amount=stripe_total,currency="gbp",description=description,source=token,application_fee=200,stripe_account=trainer_stripe_id)
-        #     stripe_product_name = 'None'
-        #     stripe_plan_id = 'None'
-        #
-        #     print('i am a normal charge')
-        #     charge = stripe.Charge.create(
-        #                 amount=stripe_total,
-        #                 currency="gbp",
-        #                 source=token,
-        #                 # customer=stripe_customer_id,
-        #                 destination={
-        #                     "account": trainer_stripe_id,
-        #                     }
-        #                 # stripe_account=trainer_stripe_id,
-        #                 )
-
-        #Now Creating the Order
+    #     #Now Creating the Order
         try:
             order_details = Order.objects.create(
                     client_name = client_name,
@@ -226,23 +219,24 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
                     client_email = client_email,
                     trainer_email = trainer_email,
                     subscription = subscription,
+                    stripe_subscription_id = stripe_subscription_id,
                     stripe_product_name = stripe_product_name,
                     stripe_plan_id = stripe_plan_id,
-                    # stripe_customer_id = stripe_customer_id
 
             )
             order_details.save()
 
             for order_item in cart_items:
                 oi = OrderItem.objects.create(
-                        workout = order_item.workout.name,
-                        sessions = order_item.workout.sessions,
-                        trainer_id = order_item.workout.trainer.user.id,
+                        workout = workout_name,
+                        sessions = sessions,
+                        trainer_id = trainer_id,
                         client_id = client_id,
                         quantity = order_item.quantity,
                         price = order_item.workout.price,
                         order = order_details,
-                        workout_description = order_item.workout.workout_description,
+                        workout_description = workout_description,
+
 
                 )
                 oi.save()
@@ -259,10 +253,10 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             # to get the sessions
             session_details = Session.objects.create(
                         client_id = client_id,
-                        trainer_id = cart_item.workout.trainer.user.id,
+                        trainer_id = trainer_id,
                         order = order_details,
-                        total_sessions = cart_item.workout.sessions,
-                        workout_name = cart_item.workout.name
+                        total_sessions = sessions,
+                        workout_name = workout_name
             )
             session_details.save()
 
@@ -279,10 +273,11 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             return redirect('order:thanks', order_details.id)
         except ObjectDoesNotExist:
             pass
-
+    #
     else:
         trainer_stripe_id = ''
         workout_name = ''
+
 
     context = {'data_key': data_key,'description':workout_name,'cart_items': cart_items, 'total': total,'stripe_total': stripe_total, 'counter': counter}
     return render(request,'cart/cart.html', context)

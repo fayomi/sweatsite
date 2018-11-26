@@ -17,6 +17,7 @@ class Order(models.Model):
     subscription = models.BooleanField(default=False)
     stripe_product_name = models.CharField(max_length=200,default='None')
     stripe_plan_id = models.CharField(max_length=200,default='None')
+    stripe_subscription_id = models.CharField(max_length=200,default='None')
     #stripe_customer_id = models.CharField(max_length=200,default='None')
 
 

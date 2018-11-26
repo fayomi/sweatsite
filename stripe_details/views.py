@@ -10,6 +10,7 @@ from django.conf import settings
 
 import json
 import stripe
+import time
 
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -315,10 +316,14 @@ def stripe_webhooks(request):
     # Retrieve the request's body and parse it as JSON:
     details = json.loads(request.body)
     # print(details)
-    print(details['type'])
+    type = details['type']
+    time.sleep(10)
 
-
-    # Do something with event_json
+    if type == "invoice.payment_succeeded":
+        subscription_id = details['data']['object']['subscription']
+        metadata = details['data']['object']['lines']['data'][0]['plan']['metadata']
+        print(subscription_id)
+        print(metadata)
 
     return HttpResponse(status=200)
 
