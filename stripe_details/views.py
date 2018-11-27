@@ -4,6 +4,8 @@ from .models import StripeDetail, Individual, Company, ExternalAccount
 from .forms import IndividualForm, CompanyForm, ExternalAccountForm
 from django.contrib.auth.decorators import login_required
 
+from order.models import Order, OrderItem
+
 from django.http import HttpResponse
 import requests
 from django.conf import settings
@@ -319,11 +321,29 @@ def stripe_webhooks(request):
     type = details['type']
     time.sleep(10)
 
+
+
     if type == "invoice.payment_succeeded":
-        subscription_id = details['data']['object']['subscription']
-        metadata = details['data']['object']['lines']['data'][0]['plan']['metadata']
-        print(subscription_id)
-        print(metadata)
+        # print(details)
+        stripe_subscription_id = details['data']['object']['subscription']
+        # metadata = details['data']['object']['lines']['data'][0]['plan']['metadata']
+        stripe_invoice_id = details['data']['object']['id']
+        # print(invoice_id)
+        # print(stripe_subscription_id)
+        # print(metadata)
+
+        order_subscription_id = Order.objects.get(stripe_subscription_id=stripe_subscription_id)
+        order_stripe_subscription_id = order_subscription_id.stripe_subscription_id
+
+        if order_stripe_subscription_id == stripe_subscription_id:
+            if order_subscription_id.stripe_invoice_id == 'None':
+                order_subscription_id.stripe_invoice_id = stripe_invoice_id
+                order_subscription_id.save()
+            elif order_subscription_id.stripe_invoice_id == stripe_invoice_id:
+                print('create new order with sessions and emails')
+            else:
+                pass
+
 
     return HttpResponse(status=200)
 

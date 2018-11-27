@@ -118,7 +118,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             plan = stripe.Plan.create(
             product={'name': stripe_product_name},
             nickname=workout_name,
-            interval='month',
+            interval='day',
             currency='gbp',
             amount=stripe_total,
             stripe_account=trainer_stripe_id,
@@ -149,6 +149,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             stripe_product_name = 'None'
             stripe_plan_id = 'None'
             stripe_subscription_id = 'None'
+            stripe_invoice_id = 'None'
 
             print('i am a normal charge')
             charge = stripe.Charge.create(
@@ -163,6 +164,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
                         )
 
         else:
+            stripe_invoice_id = 'None'
 
             if stripe_customer_id == 'None':
             # create stripe customer id
@@ -205,6 +207,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
             stripe_subscription_id = stripe_subscription(stripe_customer_id,stripe_plan_id,trainer_stripe_id)
 
 
+
     #     #Now Creating the Order
         try:
             order_details = Order.objects.create(
@@ -220,6 +223,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
                     trainer_email = trainer_email,
                     subscription = subscription,
                     stripe_subscription_id = stripe_subscription_id,
+                    stripe_invoice_id = stripe_invoice_id,
                     stripe_product_name = stripe_product_name,
                     stripe_plan_id = stripe_plan_id,
 

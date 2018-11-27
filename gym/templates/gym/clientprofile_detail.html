@@ -26,8 +26,14 @@
       {% for a in available %}
         {% if a.available_sessions == total %}
           <p>You started with {{ a.available_sessions }} available sessions. created on: {{ a.date }}</p>
+          {% if session.status == 'pending' %}
+          <p>Your request is pending</p>
+          {% endif %}
         {% else %}
           <p>You have: {{ a.available_sessions }} available sessions. Session last used on: {{ a.date }}</p>
+          {% if session.status == 'pending' %}
+          <p>Your request is pending</p>
+          {% endif %}
         {% endif %}
       {% endfor %}
       <a class="btn btn-primary" href="mailto:{{ session.order.trainer_email}}">Request Session</a>
