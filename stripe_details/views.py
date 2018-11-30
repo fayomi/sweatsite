@@ -328,8 +328,8 @@ def stripe_webhooks(request):
         stripe_subscription_id = details['data']['object']['subscription']
         # metadata = details['data']['object']['lines']['data'][0]['plan']['metadata']
         stripe_invoice_id = details['data']['object']['id']
-        # print(invoice_id)
-        # print(stripe_subscription_id)
+        print(stripe_invoice_id)
+        print(stripe_subscription_id)
         # print(metadata)
 
         order_subscription_id = Order.objects.get(stripe_subscription_id=stripe_subscription_id)
@@ -339,10 +339,11 @@ def stripe_webhooks(request):
             if order_subscription_id.stripe_invoice_id == 'None':
                 order_subscription_id.stripe_invoice_id = stripe_invoice_id
                 order_subscription_id.save()
-            elif order_subscription_id.stripe_invoice_id == stripe_invoice_id:
+                print('invoice saved')
+            elif order_subscription_id.stripe_invoice_id != stripe_invoice_id:
                 print('create new order with sessions and emails')
             else:
-                pass
+                print('nothing is happening!')
 
 
     return HttpResponse(status=200)

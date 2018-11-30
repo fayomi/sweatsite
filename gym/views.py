@@ -66,7 +66,7 @@ def clientProfileView(request, pk):
         # createAvailabeSession()
         return redirect('gym:client_profile',pk=user_id) #move to pending page
     else: # probably change status to complete
-        print('nothing to see here')
+        # print('nothing to see here')
         pass
 
     context = {'session': session, 'available': available, 'total': total}
