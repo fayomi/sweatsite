@@ -100,6 +100,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
         workout_description = cart_item.workout.workout_description
         trainer_id = cart_item.workout.trainer.user.id
         sessions = cart_item.workout.sessions
+        quantity = cart_item.quantity
 
 
 
@@ -127,7 +128,7 @@ def cart_detail(request, total=0, counter=0, cart_items = None):
                         'platform_fee':platform_fee, 'service_fee':service_fee,
                         'net_pay':str(net_pay), 'client_email':client_email, 'trainer_email':trainer_email,
                         'subscription':subscription, 'stripe_product_name':stripe_product_name, 'trainer_id':trainer_id,
-                        'sessions':sessions
+                        'sessions':sessions,'client_id':client_id, 'trainer_id':trainer_id, 'quantity':quantity, 'workout_description':workout_description
                         }
 
 

@@ -14,6 +14,11 @@ import json
 import stripe
 import time
 
+from django.template.loader import get_template
+from django.core.mail import EmailMessage
+from order.models import Order, OrderItem
+from session.models import Session, AvailableSession
+
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 
@@ -326,10 +331,32 @@ def stripe_webhooks(request):
     if type == "invoice.payment_succeeded":
         # print(details)
         stripe_subscription_id = details['data']['object']['subscription']
-        # metadata = details['data']['object']['lines']['data'][0]['plan']['metadata']
         stripe_invoice_id = details['data']['object']['id']
+        stripe_plan_id = details['data']['object']['lines']['data'][0]['plan']['id']
         print(stripe_invoice_id)
         print(stripe_subscription_id)
+
+        metadata = details['data']['object']['lines']['data'][0]['plan']['metadata']
+        client_name = metadata['client_name']
+        trainer_name = metadata['trainer_name']
+        token = metadata['token']
+        total = metadata['total']
+        stripe_fee = metadata['stripe_fee']
+        platform_fee = metadata['platform_fee']
+        service_fee = metadata['service_fee']
+        net_pay = metadata['net_pay']
+        client_email = metadata['client_email']
+        trainer_email = metadata['trainer_email']
+        subscription = metadata['subscription']
+        stripe_product_name = metadata['stripe_product_name']
+        sessions = metadata['sessions']
+        client_id = metadata['client_id']
+        trainer_id = metadata['trainer_id']
+        quantity = metadata['quantity']
+        workout_description = metadata['workout_description']
+        workout_name = stripe_product_name
+
+
         # print(metadata)
 
         order_subscription_id = Order.objects.get(stripe_subscription_id=stripe_subscription_id)
@@ -342,6 +369,75 @@ def stripe_webhooks(request):
                 print('invoice saved')
             elif order_subscription_id.stripe_invoice_id != stripe_invoice_id:
                 print('create new order with sessions and emails')
+
+
+                try:
+                    order_details = Order.objects.create(
+                            client_name = client_name,
+                            trainer_name = trainer_name,
+                            token = token,
+                            total = total,
+                            stripe_fee = stripe_fee,
+                            platform_fee = platform_fee,
+                            service_fee = service_fee,
+                            net_pay = net_pay,
+                            client_email = client_email,
+                            trainer_email = trainer_email,
+                            subscription = subscription,
+                            stripe_subscription_id = stripe_subscription_id,
+                            stripe_invoice_id = stripe_invoice_id,
+                            stripe_product_name = stripe_product_name,
+                            stripe_plan_id = stripe_plan_id,
+
+                    )
+                    order_details.save()
+
+                    oi = OrderItem.objects.create(
+                            workout = workout_name,
+                            sessions = sessions,
+                            trainer_id = trainer_id,
+                            client_id = client_id,
+                            quantity = quantity,
+                            price = total,
+                            order = order_details,
+                            workout_description = workout_description,
+
+
+                    )
+                    oi.save()
+                        # the terminal will print confirmation
+                    print('order has been created')
+                    try:
+                        # Calling the sendEmail Function
+                        sendSubscriptionClientEmail(order_details.id)
+                        print('The order email has been sent')
+                        sendSubscriptionTrainerEmail(order_details.id)
+                    except IOError as e:
+                        return e
+
+                    # to get the sessions
+                    session_details = Session.objects.create(
+                                client_id = client_id,
+                                trainer_id = trainer_id,
+                                order = order_details,
+                                total_sessions = sessions,
+                                workout_name = workout_name
+                    )
+                    session_details.save()
+
+                    a_s = AvailableSession.objects.create(
+                            session = session_details,
+                            available_sessions = sessions,
+                    )
+                    a_s.save()
+                    print('all completed')
+
+
+                except ObjectDoesNotExist:
+                    pass
+
+
+
             else:
                 print('nothing is happening!')
 
@@ -350,9 +446,52 @@ def stripe_webhooks(request):
 
 
 
+def sendSubscriptionClientEmail(order_id):
+    transaction = Order.objects.get(id=order_id)
+    order_items = OrderItem.objects.filter(order=transaction)
+    try:
+        # sending the order to customer
+        subject = "Sweatsite - Recurring Order#{}".format(transaction.id)
+        to = ['{}'.format(transaction.client_email)]
+        print(to)
+        from_email = "orders@sweatsite.com"
+        order_information = {
+        'transaction': transaction,
+        'order_items': order_items
+        }
+        message = get_template('email/client_sub_email.html').render(order_information)
+        msg = EmailMessage(subject, message, to=to, from_email=from_email)
+        msg.content_subtype = 'html'
+        msg.send()
+    except IOError as e:
+        return e
+
+def sendSubscriptionTrainerEmail(order_id):
+    transaction = Order.objects.get(id=order_id)
+    order_items = OrderItem.objects.filter(order=transaction)
+    try:
+        # sending the order to customer
+        subject = "Sweatsite - Recurring Order #{}".format(transaction.id)
+        to = ['{}'.format(transaction.trainer_email)]
+        print(to)
+        from_email = "orders@sweatsite.com"
+        order_information = {
+        'transaction': transaction,
+        'order_items': order_items
+        }
+        message = get_template('email/trainer_sub_email.html').render(order_information)
+        msg = EmailMessage(subject, message, to=to, from_email=from_email)
+        msg.content_subtype = 'html'
+        msg.send()
+    except IOError as e:
+        return e
 
 
 
+# order = 139
+# order item =136
+# session = 95
+# avail_session = 144
 
 
     #
