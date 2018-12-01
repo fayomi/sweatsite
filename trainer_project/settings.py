@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'd1)2=eo4(&j#+6*)gu(!&67dks1%jyoyrst%@0b$ogo7s1#4p%'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -136,8 +136,8 @@ LOGIN_URL = '/login/'
 
 LOGOUT_REDIRECT_URL = '/'
 
-STRIPE_SECRET_KEY = 'sk_test_EMLzJ5oruzgSGmNA3iCNFss4'
-STRIPE_PUBLISHABLE_KEY = 'pk_test_la9mk5y5S8ZrxqQc0DiP0TS8'
+STRIPE_SECRET_KEY =  os.environ['TEST_STRIPE_SECRET_KEY']
+STRIPE_PUBLISHABLE_KEY = os.environ['TEST_STRIPE_PUBLISHABLE_KEY']
 
 
 
@@ -146,4 +146,4 @@ EMAIL_HOST = 'smtp.eu.mailgun.org'
 EMAIL_PORT = '587'
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'postmaster@mg.sweatsite.com'
-EMAIL_HOST_PASSWORD = 'c89a52277476eec8e6b55df82aac523c-4836d8f5-8615df37'
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
